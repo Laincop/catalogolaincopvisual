@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor de PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <style>
+
+        body{
+            background-color: black;
+        }
+
+        #pdf-viewer {
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+            text-align: center;
+        }
+        canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Catalogo Laincop</h1>
+    <img src="./laincopbanner.png" alt="" width="100%">
+    <div id="pdf-viewer"></div>
+
+    <script>
+        const url = "catalogo.pdf"; // Cambia esto por la ruta de tu PDF
+
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+        const loadPDF = async () => {
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const viewer = document.getElementById("pdf-viewer");
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const canvas = document.createElement("canvas");
+                viewer.appendChild(canvas);
+                const context = canvas.getContext("2d");
+
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+
+                await page.render(renderContext).promise;
+            }
+        };
+
+        loadPDF();
+    </script>
+</body>
+</html>
